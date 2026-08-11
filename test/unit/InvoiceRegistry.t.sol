@@ -386,6 +386,30 @@ contract InvoiceRegistryTest is Test {
         assertEq(uint8(registry.getInvoice(id).status), uint8(InvoiceRegistry.Status.Cancelled));
     }
 
+    function test_UnpauseRestoresCreateAndPay() public {
+        vm.startPrank(owner);
+        registry.pause();
+        registry.unpause();
+        vm.stopPrank();
+
+        uint256 id = _createInvoice();
+        vm.prank(payer);
+        registry.payInFull(id);
+        assertEq(usdc.balanceOf(issuer), AMOUNT);
+    }
+
+    function test_OwnershipTransferIsTwoStep() public {
+        address newOwner = makeAddr("newOwner");
+
+        vm.prank(owner);
+        registry.transferOwnership(newOwner);
+        assertEq(registry.owner(), owner, "ownership does not move until accepted");
+
+        vm.prank(newOwner);
+        registry.acceptOwnership();
+        assertEq(registry.owner(), newOwner);
+    }
+
     function test_OnlyOwnerCanPause() public {
         vm.prank(stranger);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger));

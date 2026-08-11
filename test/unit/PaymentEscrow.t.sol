@@ -349,6 +349,28 @@ contract PaymentEscrowTest is Test {
         assertEq(usdc.balanceOf(address(escrow)), 0, "no funds stranded by pause");
     }
 
+    function test_UnpauseRestoresOpening() public {
+        vm.startPrank(owner);
+        escrow.pause();
+        escrow.unpause();
+        vm.stopPrank();
+
+        uint256 id = _open();
+        assertEq(uint8(escrow.getEscrow(id).status), uint8(PaymentEscrow.Status.Funded));
+    }
+
+    function test_OwnershipTransferIsTwoStep() public {
+        address newOwner = makeAddr("newOwner");
+
+        vm.prank(owner);
+        escrow.transferOwnership(newOwner);
+        assertEq(escrow.owner(), owner, "ownership does not move until accepted");
+
+        vm.prank(newOwner);
+        escrow.acceptOwnership();
+        assertEq(escrow.owner(), newOwner);
+    }
+
     function test_OnlyOwnerCanPause() public {
         vm.prank(stranger);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger));

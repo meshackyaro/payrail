@@ -49,6 +49,18 @@ runs = 10_000
 runs = 1_000
 depth = 128
 
+# Used by .github/workflows/test.yml. More fuzz runs than local iteration,
+# fewer than `deep`, so CI stays useful without becoming the slow step.
+[profile.ci]
+verbosity = 3
+
+[profile.ci.fuzz]
+runs = 2_000
+
+[profile.ci.invariant]
+runs = 512
+depth = 96
+
 [fmt]
 line_length = 110
 tab_width = 4

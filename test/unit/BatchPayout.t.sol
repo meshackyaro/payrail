@@ -220,6 +220,9 @@ contract BatchPayoutTest is Test {
         // consume the prank and send from this test contract instead.
         uint256 drain = usdc.balanceOf(payer) - 1500e6;
         vm.prank(payer);
+        // MockUSDC is OpenZeppelin's ERC20, which reverts rather than
+        // returning false, and this is test setup rather than settlement code.
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         usdc.transfer(stranger, drain);
 
         BatchPayout.Payment[] memory payments = _threePayments(); // needs 3,900

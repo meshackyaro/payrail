@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -10,7 +11,7 @@ env:
 
 jobs:
   check:
-    name: Foundry project
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,20 +22,32 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
 
       - name: Show Forge version
-        run: |
-          forge --version
+        run: forge --version
 
-      - name: Run Forge fmt
-        run: |
-          forge fmt --check
-        id: fmt
+      - name: Check formatting
+        run: forge fmt --check
 
-      - name: Run Forge build
-        run: |
-          forge build --sizes
-        id: build
+      - name: Lint
+        run: forge lint
 
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
-        id: test
+      - name: Build
+        run: forge build --sizes
+
+      - name: Test
+        run: forge test
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      # Excludes test helpers and scripts so the number reflects the contracts
+      # that actually settle money.
+      - name: Run coverage
+        run: forge coverage --no-match-coverage "(test|script)/" --report summary
