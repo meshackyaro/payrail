@@ -22,6 +22,11 @@ evm_version = "shanghai"
 deny_warnings = false
 ffi = false
 
+[lint]
+# Public immutables are part of the ABI the SDK and indexer consume, so they
+# keep camelCase getters (`settlementToken()`), not SCREAMING_SNAKE_CASE.
+exclude_lints = ["screaming-snake-case-immutable"]
+
 [profile.default.fuzz]
 runs = 512
 max_test_rejects = 100_000
