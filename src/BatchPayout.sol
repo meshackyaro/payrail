@@ -38,7 +38,8 @@ contract BatchPayout is Ownable2Step, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     /// @param recipient Vendor or contractor being paid.
-    /// @param amount    Amount in token base units (USDC has 6 decimals).
+    /// @param amount    Amount in token base units. USDC's ERC-20 interface has
+    ///                  6 decimals -- not the 18 decimal native gas form.
     /// @param paymentRef Opaque per-payment reference (invoice id, PO number
     ///                   hash) echoed in the event for reconciliation.
     /// @dev `reference` is a reserved word in Solidity, hence `paymentRef`.

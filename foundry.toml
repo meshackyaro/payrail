@@ -72,8 +72,9 @@ number_underscore = "thousands"
 sort_imports = true
 
 [rpc_endpoints]
-# Populate these in .env -- see .env.example. Arc's public testnet RPC URL and
-# chain ID are deliberately not hardcoded here; take them from Circle's docs.
+# Populated from .env -- see .env.example, which carries the Arc testnet
+# defaults (chain 5042002). Kept in env rather than inlined here so a dedicated
+# provider endpoint can be swapped in without touching tracked config.
 arc_testnet = "${ARC_TESTNET_RPC_URL}"
 arc_mainnet = "${ARC_MAINNET_RPC_URL}"
 local = "http://127.0.0.1:8545"

@@ -22,9 +22,15 @@ import {ReentrancyGuard} from "openzeppelin-contracts/utils/ReentrancyGuard.sol"
 ///        routinely settled in tranches. An invoice is `Paid` only once
 ///        `amountPaid == amount`.
 ///
-///      - **Amounts are `uint96`.** USDC has 6 decimals, so `uint96` covers
-///        ~7.9e22 USDC -- far beyond any real invoice -- and lets an invoice
-///        pack into fewer storage slots.
+///      - **Amounts are `uint96`.** USDC's ERC-20 interface has 6 decimals, so
+///        `uint96` covers ~7.9e22 USDC -- far beyond any real invoice -- and
+///        lets an invoice pack into fewer storage slots.
+///
+///        On Arc, USDC has two representations that differ by 1e12: the 6
+///        decimal ERC-20 interface used here, and an 18 decimal native form
+///        used only for gas and `msg.value`. Nothing in this contract is
+///        payable, so it stays entirely in the ERC-20 view. Do not "correct"
+///        these amounts to 18 decimals.
 ///
 ///      - **Metadata is reference-only.** `invoiceRef`, `purchaseOrder`, and
 ///        `documentHash` are hashes or opaque ERP identifiers. Do not put

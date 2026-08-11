@@ -79,7 +79,26 @@ forge coverage --no-match-coverage "(test|script)/" --report summary
 cp .env.example .env
 ```
 
-`.env.example` documents every value. **Arc's RPC URL and chain ID are deliberately left blank** rather than guessed — take them from Circle's Arc documentation. Deployment requires two values: `USDC_ADDRESS` and `EXPECTED_CHAIN_ID`.
+`.env.example` documents every value and ships with the Arc testnet defaults already filled in:
+
+| Variable | Arc testnet value |
+| --- | --- |
+| `ARC_TESTNET_RPC_URL` | `https://rpc.testnet.arc.network` |
+| `EXPECTED_CHAIN_ID` | `5042002` (`0x4CEF52`) |
+| `USDC_ADDRESS` | `0x3600000000000000000000000000000000000000` |
+
+Confirm these against Circle's current documentation before broadcasting — network parameters change. Testnet USDC comes from [faucet.circle.com](https://faucet.circle.com). The only value you must supply yourself is a funded deployer key.
+
+### A note on USDC decimals
+
+USDC has **two representations on Arc that differ by a factor of 10¹²**:
+
+| View | Decimals | Used for |
+| --- | --- | --- |
+| ERC-20 interface | **6** | Balances and transfers — everything PayRail does |
+| Native gas token | 18 | Gas and `msg.value` only |
+
+Every contract here stays entirely in the 6-decimal ERC-20 view. Nothing in `src/` is `payable` or reads `msg.value`, so the native form never enters the contracts' arithmetic. `MockUSDC` mirrors this at 6 decimals so tests match production. If you integrate off-chain code, keep amounts in the ERC-20 view everywhere except raw gas math — mixing the two is a 10¹² error.
 
 ### Deploying
 
