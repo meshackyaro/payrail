@@ -79,11 +79,11 @@ forge coverage --no-match-coverage "(test|script)/" --report summary
 cp .env.example .env
 ```
 
-`.env.example` documents every value. **Arc's RPC URL and chain ID are deliberately left blank** rather than guessed — take them from Circle's Arc documentation and confirm your RPC points where you expect before broadcasting. The only strictly required value for deployment is `USDC_ADDRESS`.
+`.env.example` documents every value. **Arc's RPC URL and chain ID are deliberately left blank** rather than guessed — take them from Circle's Arc documentation. Deployment requires two values: `USDC_ADDRESS` and `EXPECTED_CHAIN_ID`.
 
 ### Deploying
 
-Against a local node:
+Against a local node — `EXPECTED_CHAIN_ID` may be omitted on chain 31337:
 
 ```bash
 anvil
@@ -98,7 +98,17 @@ forge script script/Deploy.s.sol:Deploy \
   --rpc-url arc_testnet --account payrail-deployer --broadcast
 ```
 
-The script verifies `USDC_ADDRESS` has deployed code (catching an address copied from the wrong network) and warns if ownership is left on the deployer EOA. Contracts use `Ownable2Step`, so a successor owner must call `acceptOwnership()`.
+The script refuses to broadcast until three things check out:
+
+| Guard | Failure |
+| --- | --- |
+| Connected chain matches `EXPECTED_CHAIN_ID` | `ChainIdMismatch(expected, actual)` |
+| `EXPECTED_CHAIN_ID` is set at all, on any non-local chain | `ExpectedChainIdNotSet(actual)` |
+| `USDC_ADDRESS` has deployed code | `UsdcAddressHasNoCode(usdc)` |
+
+The chain check runs first and before `vm.startBroadcast()`, so a misconfigured RPC costs nothing — no nonce burned, no signed transaction left replayable on the network you actually meant to target. Leaving `EXPECTED_CHAIN_ID` blank is tolerated only on a local dev chain; anywhere else it is itself an error, because trusting whatever the RPC happens to point at is the mistake being guarded against.
+
+The script also warns if ownership is left on the deployer EOA. Contracts use `Ownable2Step`, so a successor owner must call `acceptOwnership()`.
 
 ---
 
