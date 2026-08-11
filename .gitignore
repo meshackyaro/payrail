@@ -1,0 +1,38 @@
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+.env.*
+!.env.example
+
+# Secrets / keys -- never commit
+*.pem
+*.key
+keystore/
+
+# Coverage
+lcov.info
+coverage/
+
+# Gas snapshots produced ad hoc (the committed one is .gas-snapshot)
+*.gas-snapshot.tmp
+
+# Node (api/, sdk/, indexer/ workspaces)
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/

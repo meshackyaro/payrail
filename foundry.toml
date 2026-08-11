@@ -1,0 +1,68 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+solc = "0.8.28"
+
+# PayRail settles USDC transfers that are called far more often than they are
+# deployed, so we bias the optimizer toward runtime gas over bytecode size.
+# On Arc gas is denominated in USDC, so runtime gas is a direct line item.
+optimizer = true
+optimizer_runs = 10_000
+
+# Conservative target: "shanghai" excludes Cancun-only opcodes (TSTORE/TLOAD,
+# MCOPY). Arc's execution layer is Reth-based and may well support Cancun or
+# later -- bump this once you have confirmed the supported hardfork against
+# Circle's Arc docs. Nothing in src/ depends on transient storage today.
+evm_version = "shanghai"
+
+# Payment code should never silently ignore a failed external call.
+deny_warnings = false
+ffi = false
+
+[profile.default.fuzz]
+runs = 512
+max_test_rejects = 100_000
+
+[profile.default.invariant]
+runs = 256
+depth = 64
+fail_on_revert = false
+
+# Faster feedback loop for local iteration: forge test --profile lite
+[profile.lite]
+optimizer = false
+fuzz = { runs = 32 }
+
+# Heavier sweep for pre-release checks: forge test --profile deep
+[profile.deep.fuzz]
+runs = 10_000
+
+[profile.deep.invariant]
+runs = 1_000
+depth = 128
+
+[fmt]
+line_length = 110
+tab_width = 4
+bracket_spacing = false
+int_types = "long"
+multiline_func_header = "attributes_first"
+quote_style = "double"
+number_underscore = "thousands"
+sort_imports = true
+
+[rpc_endpoints]
+# Populate these in .env -- see .env.example. Arc's public testnet RPC URL and
+# chain ID are deliberately not hardcoded here; take them from Circle's docs.
+arc_testnet = "${ARC_TESTNET_RPC_URL}"
+arc_mainnet = "${ARC_MAINNET_RPC_URL}"
+local = "http://127.0.0.1:8545"
+
+# Arc's block explorer / verification endpoint was not verified at scaffold time.
+# Once known, add it here so `forge script --verify` works:
+#
+# [etherscan]
+# arc_testnet = { key = "${ARC_EXPLORER_API_KEY}", url = "<arc explorer api url>", chain = <chain id> }
